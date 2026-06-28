@@ -19,6 +19,7 @@ data class RiderSettings(
     val fitAheadCamera: Boolean = true,
     val speedAdaptiveLookAhead: Boolean = false,
     val headingUpMap: Boolean = true,
+    val defaultMapZoom: Int = 16,
     val navMode: NavMode = NavMode.Auto,
     val orsApiKey: String = "",
 )

@@ -6,6 +6,7 @@ import com.bikeputer.data.DashboardLayout
 import com.bikeputer.data.NavMode
 import com.bikeputer.data.RiderSettings
 import com.bikeputer.data.SettingsRepository
+import com.bikeputer.ui.dashboard.MapZoom
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -27,6 +28,8 @@ class SettingsViewModel(private val settings: SettingsRepository) : ViewModel() 
         update { it.copy(offRouteThresholdM = (it.offRouteThresholdM + delta).coerceIn(10, 100)) }
     fun setSpeedAdaptiveLookAhead(adaptive: Boolean) =
         update { it.copy(speedAdaptiveLookAhead = adaptive) }
+    fun adjustDefaultMapZoom(delta: Int) =
+        update { it.copy(defaultMapZoom = MapZoom.coerce(it.defaultMapZoom + delta)) }
     fun setNavMode(mode: NavMode) = update { it.copy(navMode = mode) }
     fun setOrsApiKey(key: String) = update { it.copy(orsApiKey = key) }
 

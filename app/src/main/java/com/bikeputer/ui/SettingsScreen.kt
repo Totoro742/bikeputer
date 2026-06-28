@@ -32,6 +32,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import com.bikeputer.data.DashboardLayout
 import com.bikeputer.data.NavMode
+import com.bikeputer.ui.dashboard.PreviewMap
 import com.bikeputer.ui.theme.Barlow
 import com.bikeputer.ui.theme.JetBrainsMono
 import com.bikeputer.ui.theme.LocalBikeColors
@@ -113,6 +114,13 @@ fun SettingsScreen(vm: SettingsViewModel, onBack: () -> Unit) {
                 vm.setSpeedAdaptiveLookAhead(true)
             }
         }
+
+        SectionLabel("MAP ZOOM")
+        ZoomPreviewStepper(
+            zoom = s.defaultMapZoom,
+            onMinus = { vm.adjustDefaultMapZoom(-1) },
+            onPlus = { vm.adjustDefaultMapZoom(1) },
+        )
 
         SectionLabel("NAVIGATION MODE")
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
@@ -232,6 +240,31 @@ private fun StepBtn(label: String, onClick: () -> Unit) {
             .border(1.dp, c.border2, RoundedCornerShape(16.dp)).clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) { Text(label, color = c.text, fontSize = 30.sp) }
+}
+
+@Composable
+private fun ZoomPreviewStepper(zoom: Int, onMinus: () -> Unit, onPlus: () -> Unit) {
+    val c = LocalBikeColors.current
+    Column(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(c.panel)
+            .border(1.dp, c.border, RoundedCornerShape(16.dp)).padding(18.dp),
+    ) {
+        Box(Modifier.fillMaxWidth().height(160.dp).clip(RoundedCornerShape(12.dp))) {
+            PreviewMap(zoom = zoom, modifier = Modifier.fillMaxSize())
+        }
+        Row(
+            Modifier.fillMaxWidth().padding(top = 14.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            StepBtn("−", onMinus)
+            Row(verticalAlignment = Alignment.Bottom) {
+                Text(zoom.toString(), color = c.text, fontFamily = Barlow, fontWeight = FontWeight.ExtraBold, fontSize = 60.sp)
+                Text("zoom", color = c.dim, fontFamily = JetBrainsMono, fontWeight = FontWeight.SemiBold, fontSize = 18.sp, modifier = Modifier.padding(start = 5.dp, bottom = 8.dp))
+            }
+            StepBtn("+", onPlus)
+        }
+    }
 }
 
 @Composable

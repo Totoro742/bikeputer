@@ -257,6 +257,7 @@ private fun RideHost(
         offRouteThresholdM = settings.offRouteThresholdM,
         fitAheadCamera = settings.fitAheadCamera,
         speedAdaptiveLookAhead = settings.speedAdaptiveLookAhead,
+        defaultZoom = settings.defaultMapZoom,
         onToggleFitAhead = onToggleFitAhead,
         headingUp = settings.headingUpMap,
         onToggleHeadingUp = onToggleHeadingUp,
