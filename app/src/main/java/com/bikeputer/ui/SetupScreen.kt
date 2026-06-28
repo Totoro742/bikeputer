@@ -40,7 +40,6 @@ import com.bikeputer.ui.theme.LocalBikeColors
 fun SetupScreen(
     vm: SetupViewModel,
     onStartRide: () -> Unit,
-    onDemo: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenRoutes: () -> Unit,
 ) {
@@ -174,15 +173,6 @@ fun SetupScreen(
             )
         }
 
-        Box(
-            Modifier
-                .fillMaxWidth().padding(top = 10.dp).height(48.dp)
-                .clip(RoundedCornerShape(14.dp)).border(1.dp, c.border, RoundedCornerShape(14.dp))
-                .clickable(onClick = onDemo),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text("Demo data", color = c.text2, fontFamily = JetBrainsMono, fontWeight = FontWeight.Medium, fontSize = 15.sp)
-        }
         Box(
             Modifier
                 .fillMaxWidth().padding(top = 10.dp, bottom = 24.dp).height(48.dp)

@@ -14,8 +14,6 @@ and renders them on swipeable dashboards with turn-by-turn route navigation.
   OpenRouteService for real street names and maneuvers.
 - **Background recording** through a foreground service, so a ride keeps running
   while the app is backgrounded.
-- **Demo mode** that drives the dashboards from synthetic sensors — no hardware
-  required to try it.
 - Light/dark themes and metric/imperial units.
 
 ## Architecture

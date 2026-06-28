@@ -39,16 +39,6 @@ import com.bikeputer.data.RouteStore
 import com.bikeputer.data.SettingsRepository
 import com.bikeputer.domain.GeoPos
 import com.bikeputer.domain.RidePhase
-import com.bikeputer.domain.HeartRateSample
-import com.bikeputer.domain.LocationSample
-import com.bikeputer.domain.PowerSample
-import com.bikeputer.metrics.Zones
-import com.bikeputer.ride.FakeHeartRateSource
-import com.bikeputer.ride.FakeLocationProvider
-import com.bikeputer.ride.FakePowerSource
-import com.bikeputer.ride.RideRepository
-import com.bikeputer.ride.RideSession
-import com.bikeputer.ride.SessionTimer
 import com.bikeputer.service.RideService
 import com.bikeputer.ui.RideViewModel
 import com.bikeputer.ui.RoutesScreen
@@ -61,15 +51,12 @@ import com.bikeputer.ui.dashboard.RideDashboard
 import com.bikeputer.ui.dashboard.RideSummaryScreen
 import com.bikeputer.ui.theme.BikeputerTheme
 import com.bikeputer.ui.theme.LocalBikeColors
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 
-private enum class Screen { Setup, Settings, Ride, Summary, Demo, DemoSummary, Routes }
+private enum class Screen { Setup, Settings, Ride, Summary, Routes }
 
 class MainActivity : ComponentActivity() {
 
@@ -138,7 +125,6 @@ class MainActivity : ComponentActivity() {
                                     )
                                     screen = Screen.Ride
                                 },
-                                onDemo = { screen = Screen.Demo },
                                 onOpenSettings = { screen = Screen.Settings },
                                 onOpenRoutes = { screen = Screen.Routes },
                             )
@@ -187,30 +173,6 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                         }
-                        Screen.Demo, Screen.DemoSummary -> {
-                            val factory = remember { fakeRideFactory() }
-                            val vm: RideViewModel = viewModel(key = "demo", factory = factory)
-                            if (screen == Screen.Demo) {
-                                RideHost(
-                                    vm, settings, emptyList(),
-                                    onToggleHeadingUp = {
-                                        lifecycleScope.launch {
-                                            settingsRepo.update { it.copy(headingUpMap = !it.headingUpMap) }
-                                        }
-                                    },
-                                    onFinish = { screen = Screen.DemoSummary },
-                                )
-                            } else {
-                                val state by vm.state.collectAsState()
-                                val route by vm.route.collectAsState()
-                                RideSummaryScreen(
-                                    state = state,
-                                    route = route,
-                                    imperial = settings.useImperial,
-                                    onDone = { screen = Screen.Setup },
-                                )
-                            }
-                        }
                         Screen.Routes -> {
                             val routesVm: RoutesViewModel = viewModel(factory = routesFactory())
                             RoutesScreen(vm = routesVm, onBack = { screen = Screen.Setup })
@@ -243,21 +205,6 @@ class MainActivity : ComponentActivity() {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T =
             RoutesViewModel(RouteStore(filesDir), settingsRepo) as T
-    }
-
-    private fun fakeRideFactory() = object : ViewModelProvider.Factory {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            val repo = RideRepository(
-                power = FakePowerSource((0..600).map { PowerSample(it * 1000L, 180 + (it % 60), 90) }, intervalMs = 1000),
-                heartRate = FakeHeartRateSource((0..600).map { HeartRateSample(it * 1000L, 140 + (it % 20)) }, intervalMs = 1000),
-                location = FakeLocationProvider((0..600).map { LocationSample(it * 1000L, 50.06 + it * 0.0004, 19.94 + it * 0.0004, 200.0, 8f) }, intervalMs = 1000),
-                powerZones = Zones.powerZonesFromFtp(220),
-                hrZones = Zones.hrZonesFromMax(190),
-            )
-            val session = RideSession(repo, SessionTimer(), CoroutineScope(SupervisorJob() + Dispatchers.Default))
-            return RideViewModel(MutableStateFlow(session), ownedSession = session) as T
-        }
     }
 
     private suspend fun loadPlanned(id: String?): List<com.bikeputer.domain.GeoPos> =
