@@ -37,6 +37,7 @@ import com.bikeputer.nav.online.simplifyRoute
 import com.bikeputer.data.RiderSettings
 import com.bikeputer.data.RouteStore
 import com.bikeputer.data.SettingsRepository
+import com.bikeputer.domain.CustomGrid
 import com.bikeputer.domain.GeoPos
 import com.bikeputer.domain.RidePhase
 import com.bikeputer.service.RideService
@@ -243,6 +244,10 @@ private fun RideHost(
 
     LaunchedEffect(Unit) { vm.start() }
 
+    val activeGrid = settings.customGrids.firstOrNull { it.id == settings.activeCustomGridId }
+        ?: settings.customGrids.firstOrNull()
+        ?: CustomGrid.DEFAULT
+
     RideDashboard(
         state = state,
         layout = settings.layout,
@@ -258,6 +263,7 @@ private fun RideHost(
         fitAheadCamera = settings.fitAheadCamera,
         speedAdaptiveLookAhead = settings.speedAdaptiveLookAhead,
         defaultZoom = settings.defaultMapZoom,
+        customGrid = activeGrid,
         onToggleFitAhead = onToggleFitAhead,
         headingUp = settings.headingUpMap,
         onToggleHeadingUp = onToggleHeadingUp,

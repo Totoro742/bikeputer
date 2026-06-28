@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import com.bikeputer.data.DashboardLayout
+import com.bikeputer.domain.CustomGrid
 import com.bikeputer.domain.GeoPos
 import com.bikeputer.domain.RideState
 import com.bikeputer.nav.DEFAULT_OFF_ROUTE_THRESHOLD_M
@@ -36,6 +37,7 @@ fun RideDashboard(
     fitAheadCamera: Boolean = false,
     speedAdaptiveLookAhead: Boolean = false,
     defaultZoom: Int = 16,
+    customGrid: CustomGrid? = null,
     onToggleFitAhead: () -> Unit = {},
     headingUp: Boolean = false,
     onToggleHeadingUp: () -> Unit = {},
@@ -57,8 +59,31 @@ fun RideDashboard(
             when (layout) {
                 DashboardLayout.A -> DashboardA(state, imperial, ftp)
                 DashboardLayout.B -> DashboardB(state, imperial, ftp)
-                // TEMPORARY fallback — Task 5 replaces this with CustomDashboard.
-                DashboardLayout.Custom -> DashboardA(state, imperial, ftp)
+                DashboardLayout.Custom -> {
+                    val grid = customGrid
+                    if (grid == null) {
+                        DashboardA(state, imperial, ftp)
+                    } else {
+                        CustomDashboard(
+                            grid = grid,
+                            state = state,
+                            imperial = imperial,
+                            ftp = ftp,
+                            route = route,
+                            planned = planned,
+                            onlineManeuvers = onlineManeuvers,
+                            navStatus = navStatus,
+                            rerouteClient = rerouteClient,
+                            offRouteThresholdM = offRouteThresholdM,
+                            fitAheadCamera = fitAheadCamera,
+                            speedAdaptiveLookAhead = speedAdaptiveLookAhead,
+                            defaultZoom = defaultZoom,
+                            onToggleFitAhead = onToggleFitAhead,
+                            headingUp = headingUp,
+                            onToggleHeadingUp = onToggleHeadingUp,
+                        )
+                    }
+                }
                 DashboardLayout.C -> DashboardC(
                     state = state,
                     imperial = imperial,
