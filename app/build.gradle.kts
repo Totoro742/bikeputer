@@ -6,8 +6,9 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
-// Release signing is configured via a local, untracked keystore.properties
-// (see keystore.properties.sample). Absent it, release builds stay unsigned.
+// Release signing is configured via a local, untracked keystore.properties with
+// keys: storeFile, storePassword, keyAlias, keyPassword. Absent it, release
+// builds stay unsigned.
 val keystorePropsFile = rootProject.file("keystore.properties")
 val keystoreProps = Properties().apply {
     if (keystorePropsFile.exists()) keystorePropsFile.inputStream().use { load(it) }
