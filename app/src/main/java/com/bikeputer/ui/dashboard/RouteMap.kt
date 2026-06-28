@@ -266,3 +266,84 @@ fun RouteMap(
         }
     }
 }
+
+/** Centre of the fixed sample route shown in the Settings zoom preview. */
+private val SAMPLE_ROUTE_CENTER = GeoPoint(52.2297, 21.0122)
+private val SAMPLE_ROUTE = listOf(
+    GeoPoint(52.2289, 21.0096),
+    GeoPoint(52.2294, 21.0110),
+    GeoPoint(52.2297, 21.0122),
+    GeoPoint(52.2301, 21.0135),
+    GeoPoint(52.2307, 21.0146),
+)
+
+/**
+ * A small, non-interactive map rendering a fixed [SAMPLE_ROUTE] at [zoom]. Used in
+ * Settings to preview the chosen default map zoom; theme-aware via [tileSource].
+ * Gestures and zoom buttons are disabled — it is a preview, not a control.
+ */
+@Composable
+fun PreviewMap(zoom: Int, modifier: Modifier = Modifier) {
+    val c = LocalBikeColors.current
+    val ctx = LocalContext.current
+
+    val sampleLine = remember {
+        Polyline().apply {
+            outlinePaint.color = c.route.toArgb()
+            outlinePaint.strokeWidth = 10f
+            setPoints(SAMPLE_ROUTE)
+        }
+    }
+    val dot = remember {
+        GradientDrawable().apply {
+            shape = GradientDrawable.OVAL
+            setColor(c.accent.toArgb())
+            setSize(34, 34)
+        }
+    }
+    val mapView = remember {
+        Configuration.getInstance().userAgentValue = ctx.packageName
+        MapView(ctx).apply {
+            setTileSource(tileSource(c.isLight))
+            setMultiTouchControls(false)
+            zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
+            setOnTouchListener { _, _ -> true } // preview only — swallow gestures
+            overlays.add(sampleLine)
+            Marker(this).apply {
+                icon = dot
+                position = SAMPLE_ROUTE_CENTER
+                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                setInfoWindow(null)
+                setOnMarkerClickListener { _, _ -> true }
+            }.also { overlays.add(it) }
+            controller.setZoom(zoom.toDouble())
+            controller.setCenter(SAMPLE_ROUTE_CENTER)
+        }
+    }
+
+    var lastIsLight by remember { mutableStateOf(c.isLight) }
+
+    DisposableEffect(Unit) {
+        mapView.onResume()
+        onDispose {
+            mapView.onPause()
+            mapView.onDetach()
+        }
+    }
+
+    AndroidView(
+        factory = { mapView },
+        modifier = modifier,
+        update = { map ->
+            if (c.isLight != lastIsLight) {
+                map.setTileSource(tileSource(c.isLight))
+                lastIsLight = c.isLight
+            }
+            sampleLine.outlinePaint.color = c.route.toArgb()
+            dot.setColor(c.accent.toArgb())
+            map.controller.setZoom(zoom.toDouble())
+            map.controller.setCenter(SAMPLE_ROUTE_CENTER)
+            map.invalidate()
+        },
+    )
+}
