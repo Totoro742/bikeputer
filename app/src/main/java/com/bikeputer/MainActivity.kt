@@ -41,6 +41,7 @@ import com.bikeputer.domain.CustomGrid
 import com.bikeputer.domain.GeoPos
 import com.bikeputer.domain.RidePhase
 import com.bikeputer.service.RideService
+import com.bikeputer.ui.GridEditorScreen
 import com.bikeputer.ui.RideViewModel
 import com.bikeputer.ui.RoutesScreen
 import com.bikeputer.ui.RoutesViewModel
@@ -57,7 +58,7 @@ import kotlinx.coroutines.withContext
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 
-private enum class Screen { Setup, Settings, Ride, Summary, Routes }
+private enum class Screen { Setup, Settings, Ride, Summary, Routes, GridEditor }
 
 class MainActivity : ComponentActivity() {
 
@@ -80,6 +81,7 @@ class MainActivity : ComponentActivity() {
             BikeputerTheme(dark = settings.darkTheme) {
                 Box(Modifier.fillMaxSize().background(LocalBikeColors.current.bg)) {
                     var screen by remember { mutableStateOf(Screen.Setup) }
+                    var editingGridId by remember { mutableStateOf<String?>(null) }
                     var plannedRoute by remember { mutableStateOf<List<GeoPos>>(emptyList()) }
                     LaunchedEffect(settings.activeRouteId) {
                         plannedRoute = loadPlanned(settings.activeRouteId)
@@ -132,7 +134,25 @@ class MainActivity : ComponentActivity() {
                         }
                         Screen.Settings -> {
                             val settingsVm: SettingsViewModel = viewModel(factory = settingsFactory())
-                            SettingsScreen(vm = settingsVm, onBack = { screen = Screen.Setup })
+                            SettingsScreen(
+                                vm = settingsVm,
+                                onBack = { screen = Screen.Setup },
+                                onEditGrid = { id -> editingGridId = id; screen = Screen.GridEditor },
+                            )
+                        }
+                        Screen.GridEditor -> {
+                            val settingsVm: SettingsViewModel = viewModel(factory = settingsFactory())
+                            val s by settingsVm.riderSettings.collectAsState()
+                            val grid = s.customGrids.firstOrNull { it.id == editingGridId }
+                            if (grid == null) {
+                                screen = Screen.Settings
+                            } else {
+                                GridEditorScreen(
+                                    grid = grid,
+                                    onSave = { settingsVm.saveCustomGrid(it) },
+                                    onBack = { screen = Screen.Settings },
+                                )
+                            }
                         }
                         Screen.Ride, Screen.Summary -> {
                             val factory = remember { realRideFactory() }
