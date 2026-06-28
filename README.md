@@ -4,6 +4,12 @@ An Android cycling computer built with Kotlin and Jetpack Compose. It reads
 Bluetooth LE power and heart-rate sensors plus GPS, computes live ride metrics,
 and renders them on swipeable dashboards with turn-by-turn route navigation.
 
+## Screenshots
+
+| Setup | Navigation |
+| :---: | :---: |
+| <img src="screenshots/setup.png" width="270" alt="Setup screen with sensor pairing"> | <img src="screenshots/navigation.png" width="270" alt="Navigation dashboard with map and turn-by-turn cue"> |
+
 ## Features
 
 - **Live metrics** — speed, distance, instantaneous & normalized power, heart
@@ -51,4 +57,4 @@ navigation engine.
 
 ## License
 
-No license is currently specified.
+Released under the [MIT License](LICENSE).
