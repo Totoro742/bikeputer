@@ -73,6 +73,7 @@ fun DashboardC(
     offRouteThresholdM: Int = DEFAULT_OFF_ROUTE_THRESHOLD_M,
     fitAheadCamera: Boolean = false,
     speedAdaptiveLookAhead: Boolean = false,
+    defaultZoom: Int = 16,
     onToggleFitAhead: () -> Unit = {},
     headingUp: Boolean = false,
     onToggleHeadingUp: () -> Unit = {},
@@ -172,6 +173,7 @@ fun DashboardC(
                 headingUp = headingUp,
                 bearingDeg = state.bearingDeg,
                 frozen = frozen,
+                defaultZoom = defaultZoom,
                 onUserPan = { frozen = true },
             )
             // bottom-right: route progress (when navigating) stacked above ride distance
