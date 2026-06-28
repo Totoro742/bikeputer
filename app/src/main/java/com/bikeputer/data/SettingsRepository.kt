@@ -26,6 +26,7 @@ class SettingsRepository(private val context: Context) {
         val fitAheadCamera = booleanPreferencesKey("fit_ahead_camera")
         val speedAdaptiveLookAhead = booleanPreferencesKey("speed_adaptive_look_ahead")
         val headingUpMap = booleanPreferencesKey("heading_up_map")
+        val defaultMapZoom = intPreferencesKey("default_map_zoom")
         val navMode = stringPreferencesKey("nav_mode")
         val orsApiKey = stringPreferencesKey("ors_api_key")
     }
@@ -46,6 +47,7 @@ class SettingsRepository(private val context: Context) {
             fitAheadCamera = p[Keys.fitAheadCamera] ?: d.fitAheadCamera,
             speedAdaptiveLookAhead = p[Keys.speedAdaptiveLookAhead] ?: d.speedAdaptiveLookAhead,
             headingUpMap = p[Keys.headingUpMap] ?: d.headingUpMap,
+            defaultMapZoom = p[Keys.defaultMapZoom] ?: d.defaultMapZoom,
             navMode = p[Keys.navMode]?.let { runCatching { NavMode.valueOf(it) }.getOrNull() } ?: d.navMode,
             orsApiKey = p[Keys.orsApiKey] ?: d.orsApiKey,
         )
@@ -70,6 +72,7 @@ class SettingsRepository(private val context: Context) {
             p[Keys.fitAheadCamera] = next.fitAheadCamera
             p[Keys.speedAdaptiveLookAhead] = next.speedAdaptiveLookAhead
             p[Keys.headingUpMap] = next.headingUpMap
+            p[Keys.defaultMapZoom] = next.defaultMapZoom
             p[Keys.navMode] = next.navMode.name
             p[Keys.orsApiKey] = next.orsApiKey
         }
