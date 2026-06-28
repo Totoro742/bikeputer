@@ -29,9 +29,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import com.bikeputer.data.DashboardLayout
 import com.bikeputer.data.NavMode
+import com.bikeputer.domain.CustomGrid
 import com.bikeputer.ui.dashboard.PreviewMap
 import com.bikeputer.ui.theme.Barlow
 import com.bikeputer.ui.theme.JetBrainsMono
@@ -41,7 +44,7 @@ import com.bikeputer.ui.theme.hrZoneTable
 import com.bikeputer.ui.theme.powerZoneTable
 
 @Composable
-fun SettingsScreen(vm: SettingsViewModel, onBack: () -> Unit) {
+fun SettingsScreen(vm: SettingsViewModel, onBack: () -> Unit, onEditGrid: (String) -> Unit = {}) {
     val c = LocalBikeColors.current
     val s by vm.riderSettings.collectAsState()
 
@@ -76,6 +79,20 @@ fun SettingsScreen(vm: SettingsViewModel, onBack: () -> Unit) {
         LayoutRow("B", "Instrument", "Dense head-unit grid", s.layout == DashboardLayout.B) { vm.setLayout(DashboardLayout.B) }
         Spacer(Modifier.height(9.dp))
         LayoutRow("C", "Ride", "Map-forward & bold", s.layout == DashboardLayout.C) { vm.setLayout(DashboardLayout.C) }
+        Spacer(Modifier.height(9.dp))
+        LayoutRow("D", "Custom", "Build-your-own grid", s.layout == DashboardLayout.Custom) {
+            vm.setLayout(DashboardLayout.Custom)
+        }
+
+        GridManager(
+            grids = s.customGrids,
+            activeId = s.activeCustomGridId ?: s.customGrids.firstOrNull()?.id,
+            onSelect = vm::setActiveCustomGrid,
+            onRename = vm::renameCustomGrid,
+            onDelete = vm::deleteCustomGrid,
+            onEdit = onEditGrid,
+            onAdd = { vm.addCustomGrid() },
+        )
 
         SectionLabel("APPEARANCE")
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
@@ -146,6 +163,37 @@ fun SettingsScreen(vm: SettingsViewModel, onBack: () -> Unit) {
 
         Spacer(Modifier.height(28.dp))
     }
+}
+
+@Composable
+private fun GridManager(
+    grids: List<CustomGrid>,
+    activeId: String?,
+    onSelect: (String) -> Unit,
+    onRename: (String, String) -> Unit,
+    onDelete: (String) -> Unit,
+    onEdit: (String) -> Unit,
+    onAdd: () -> Unit,
+) {
+    val c = LocalBikeColors.current
+    SectionLabel("DASHBOARD GRIDS")
+    grids.forEach { g ->
+        Row(
+            Modifier.fillMaxWidth().padding(vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            RadioButton(selected = g.id == activeId, onClick = { onSelect(g.id) })
+            OutlinedTextField(
+                value = g.name,
+                onValueChange = { onRename(g.id, it) },
+                singleLine = true,
+                modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+            )
+            TextButton(onClick = { onEdit(g.id) }) { Text("Edit") }
+            TextButton(onClick = { onDelete(g.id) }) { Text("Delete") }
+        }
+    }
+    TextButton(onClick = onAdd) { Text("+ New grid") }
 }
 
 @Composable
