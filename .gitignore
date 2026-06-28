@@ -9,6 +9,7 @@ build/
 .cxx
 *.apk
 *.keystore
+keystore.properties
 
 # internal design docs (specs/plans/backlog) — kept local, not published
 /docs/
