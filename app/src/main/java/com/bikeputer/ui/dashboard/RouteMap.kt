@@ -37,11 +37,7 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 
-private const val MIN_ZOOM = 14.0
-private const val MAX_ZOOM = 17.0
 private const val CAMERA_PADDING_PX = 80
-/** Fixed zoom for plain follow mode (and the baseline restored when leaving fit-ahead). */
-private const val FOLLOW_ZOOM = 16.0
 
 private val CartoDark = object : OnlineTileSourceBase(
     "CartoDarkMatter", 0, 20, 256, ".png",
@@ -97,6 +93,7 @@ fun RouteMap(
     headingUp: Boolean = false,
     bearingDeg: Float? = null,
     frozen: Boolean = false,
+    defaultZoom: Int = 16,
     onUserPan: () -> Unit = {},
 ) {
     val c = LocalBikeColors.current
@@ -122,7 +119,7 @@ fun RouteMap(
             setTileSource(tileSource(c.isLight))
             setMultiTouchControls(true)
             zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
-            controller.setZoom(FOLLOW_ZOOM)
+            controller.setZoom(defaultZoom.toDouble())
             overlays.add(plannedLine)
             overlays.add(polyline)
             // Two-finger twist to rotate the map. The gesture's ACTION_MOVE events
@@ -199,8 +196,10 @@ fun RouteMap(
                                     BoundingBox.fromGeoPoints(aheadWindow + current), false, CAMERA_PADDING_PX,
                                 )
                                 val z = map.zoomLevelDouble
-                                if (z > MAX_ZOOM) map.controller.setZoom(MAX_ZOOM)
-                                else if (z < MIN_ZOOM) map.controller.setZoom(MIN_ZOOM)
+                                val maxZ = MapZoom.adaptiveMax(defaultZoom)
+                                val minZ = MapZoom.adaptiveMin(defaultZoom)
+                                if (z > maxZ) map.controller.setZoom(maxZ)
+                                else if (z < minZ) map.controller.setZoom(minZ)
                             }
                         }
                     } else {
@@ -208,7 +207,7 @@ fun RouteMap(
                         // Leaving fit-ahead (toggle off or off-route): restore the fixed
                         // follow zoom once, then leave zoom alone so pinch-zoom persists.
                         if (wasFitAhead) {
-                            map.controller.setZoom(FOLLOW_ZOOM)
+                            map.controller.setZoom(defaultZoom.toDouble())
                             wasFitAhead = false
                         }
                         map.mapOrientation = targetOrientation
