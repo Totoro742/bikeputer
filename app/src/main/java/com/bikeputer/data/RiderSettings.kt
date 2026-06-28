@@ -1,7 +1,9 @@
 package com.bikeputer.data
 
+import com.bikeputer.domain.CustomGrid
+
 /** Which dashboard layout the ride screen renders. */
-enum class DashboardLayout { A, B, C }
+enum class DashboardLayout { A, B, C, Custom }
 
 /** How navigation chooses between online (engine instructions) and offline (geometry) turns. */
 enum class NavMode { Auto, Online, Offline }
@@ -22,4 +24,6 @@ data class RiderSettings(
     val defaultMapZoom: Int = 16,
     val navMode: NavMode = NavMode.Auto,
     val orsApiKey: String = "",
+    val customGrids: List<CustomGrid> = listOf(CustomGrid.DEFAULT),
+    val activeCustomGridId: String? = null,
 )

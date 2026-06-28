@@ -57,6 +57,8 @@ fun RideDashboard(
             when (layout) {
                 DashboardLayout.A -> DashboardA(state, imperial, ftp)
                 DashboardLayout.B -> DashboardB(state, imperial, ftp)
+                // TEMPORARY fallback — Task 5 replaces this with CustomDashboard.
+                DashboardLayout.Custom -> DashboardA(state, imperial, ftp)
                 DashboardLayout.C -> DashboardC(
                     state = state,
                     imperial = imperial,

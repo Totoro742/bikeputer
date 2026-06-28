@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.bikeputer.domain.CustomGrid
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -29,6 +30,8 @@ class SettingsRepository(private val context: Context) {
         val defaultMapZoom = intPreferencesKey("default_map_zoom")
         val navMode = stringPreferencesKey("nav_mode")
         val orsApiKey = stringPreferencesKey("ors_api_key")
+        val customGrids = stringPreferencesKey("custom_grids")
+        val activeCustomGrid = stringPreferencesKey("active_custom_grid")
     }
 
     val settings: Flow<RiderSettings> = context.dataStore.data.map { p ->
@@ -50,6 +53,11 @@ class SettingsRepository(private val context: Context) {
             defaultMapZoom = p[Keys.defaultMapZoom] ?: d.defaultMapZoom,
             navMode = p[Keys.navMode]?.let { runCatching { NavMode.valueOf(it) }.getOrNull() } ?: d.navMode,
             orsApiKey = p[Keys.orsApiKey] ?: d.orsApiKey,
+            customGrids = p[Keys.customGrids]
+                ?.let { CustomGridCodec.decode(it) }
+                ?.takeIf { it.isNotEmpty() }
+                ?: d.customGrids,
+            activeCustomGridId = p[Keys.activeCustomGrid],
         )
     }
 
@@ -75,6 +83,9 @@ class SettingsRepository(private val context: Context) {
             p[Keys.defaultMapZoom] = next.defaultMapZoom
             p[Keys.navMode] = next.navMode.name
             p[Keys.orsApiKey] = next.orsApiKey
+            p[Keys.customGrids] = CustomGridCodec.encode(next.customGrids)
+            val ag = next.activeCustomGridId
+            if (ag != null) p[Keys.activeCustomGrid] = ag else p.remove(Keys.activeCustomGrid)
         }
     }
 }
