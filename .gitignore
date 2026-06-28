@@ -1,0 +1,22 @@
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.DS_Store
+build/
+/captures
+.externalNativeBuild
+.cxx
+*.apk
+*.keystore
+
+# internal design docs (specs/plans/backlog) — kept local, not published
+/docs/
+
+# local dev artifacts
+/bugreport*
+/Screenshot_*.png
+
+# AI-assistant tooling — local only
+/CLAUDE.md
+/.claude/
