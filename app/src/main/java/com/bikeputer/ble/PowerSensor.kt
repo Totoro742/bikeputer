@@ -76,4 +76,16 @@ class PowerSensor(context: Context) : PowerSource {
             .useAutoConnect(true)
             .suspend()
     }
+
+    /**
+     * Releases the underlying GATT client. Must be called when the sensor is no
+     * longer needed. Without this each ride leaks a [BluetoothGatt] client (and its
+     * auto-reconnect keeps competing for the sensor's single connection); after a few
+     * rides Android's client pool is exhausted and connections stop delivering data.
+     */
+    fun close() {
+        runCatching { manager.disconnect().enqueue() }
+        manager.close()
+        _connected.value = false
+    }
 }
