@@ -48,6 +48,8 @@ fun DashboardC(
     onToggleFitAhead: () -> Unit = {},
     headingUp: Boolean = false,
     onToggleHeadingUp: () -> Unit = {},
+    powerPaired: Boolean = true,
+    hrPaired: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     val c = LocalBikeColors.current
@@ -71,21 +73,42 @@ fun DashboardC(
             modifier = Modifier.fillMaxWidth().weight(0.55f),
         )
 
+        // Without a power meter, its two tiles (power, cadence) fall back to
+        // average / max speed; without an HR strap, heart rate falls back to distance.
+        val powerTile = if (powerPaired) {
+            CTile("POWER", DashFormat.power(state.instantPowerW),
+                if (state.powerConnected) c.text else c.dim,
+                sub = state.powerZone?.let { "Z$it · WATTS" } ?: "WATTS",
+                subColor = powerZoneColor(state.powerZone) ?: c.dim,
+                zone = state.powerZone)
+        } else {
+            CTile("AVG SPEED", DashFormat.speed(state.avgSpeedKmh, imperial), c.text,
+                sub = DashFormat.speedUnit(imperial), subColor = c.dim)
+        }
+        val hrTile = if (hrPaired) {
+            CTile("HEART RATE", DashFormat.int(state.heartRateBpm),
+                if (state.hrConnected) HeartRateColor else c.dim,
+                sub = state.hrZone?.let { "Z$it · BPM" } ?: "BPM",
+                subColor = hrZoneColor(state.hrZone) ?: c.dim,
+                zone = state.hrZone,
+                zoneColors = HrZoneColors)
+        } else {
+            CTile("DISTANCE", DashFormat.distanceValue(state.distanceM, imperial), c.text,
+                sub = DashFormat.distanceUnit(state.distanceM, imperial), subColor = c.dim)
+        }
+        val cadenceTile = if (powerPaired) {
+            CTile("CADENCE", DashFormat.int(state.cadenceRpm), c.text, sub = "RPM", subColor = c.dim)
+        } else {
+            CTile("MAX SPEED", DashFormat.speed(state.maxSpeedKmh, imperial), c.text,
+                sub = DashFormat.speedUnit(imperial), subColor = c.dim)
+        }
+
         // 3×2 metric grid
         Column(Modifier.fillMaxWidth().weight(0.45f).background(c.bg2)) {
             CGridRow(
-                CTile("POWER", DashFormat.power(state.instantPowerW),
-                    if (state.powerConnected) c.text else c.dim,
-                    sub = state.powerZone?.let { "Z$it · WATTS" } ?: "WATTS",
-                    subColor = powerZoneColor(state.powerZone) ?: c.dim,
-                    zone = state.powerZone),
-                CTile("HEART RATE", DashFormat.int(state.heartRateBpm),
-                    if (state.hrConnected) HeartRateColor else c.dim,
-                    sub = state.hrZone?.let { "Z$it · BPM" } ?: "BPM",
-                    subColor = hrZoneColor(state.hrZone) ?: c.dim,
-                    zone = state.hrZone,
-                    zoneColors = HrZoneColors),
-                CTile("CADENCE", DashFormat.int(state.cadenceRpm), c.text, sub = "RPM", subColor = c.dim),
+                powerTile,
+                hrTile,
+                cadenceTile,
                 Modifier.weight(1f),
             )
             HLine()

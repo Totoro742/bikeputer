@@ -41,6 +41,8 @@ fun RideDashboard(
     onToggleFitAhead: () -> Unit = {},
     headingUp: Boolean = false,
     onToggleHeadingUp: () -> Unit = {},
+    powerPaired: Boolean = true,
+    hrPaired: Boolean = true,
     onBack: () -> Unit,
     onTogglePause: () -> Unit,
     modifier: Modifier = Modifier,
@@ -99,6 +101,8 @@ fun RideDashboard(
                     onToggleFitAhead = onToggleFitAhead,
                     headingUp = headingUp,
                     onToggleHeadingUp = onToggleHeadingUp,
+                    powerPaired = powerPaired,
+                    hrPaired = hrPaired,
                 )
             }
         }
