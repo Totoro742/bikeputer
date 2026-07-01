@@ -7,11 +7,11 @@ class MapZoomTest {
 
     @Test
     fun coerce_clamps_to_setting_range() {
-        assertEquals(13, MapZoom.coerce(10))
+        assertEquals(13, MapZoom.coerce(7))
         assertEquals(13, MapZoom.coerce(13))
-        assertEquals(15, MapZoom.coerce(15))
-        assertEquals(18, MapZoom.coerce(18))
-        assertEquals(18, MapZoom.coerce(25))
+        assertEquals(17, MapZoom.coerce(17))
+        assertEquals(21, MapZoom.coerce(21))
+        assertEquals(21, MapZoom.coerce(25))
     }
 
     @Test
