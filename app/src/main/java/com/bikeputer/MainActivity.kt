@@ -287,6 +287,8 @@ private fun RideHost(
         onToggleFitAhead = onToggleFitAhead,
         headingUp = settings.headingUpMap,
         onToggleHeadingUp = onToggleHeadingUp,
+        powerPaired = settings.powerSensorMac != null,
+        hrPaired = settings.hrSensorMac != null,
         onBack = { showEndDialog = true },
         onTogglePause = {
             if (phase == RidePhase.Paused) vm.resume() else vm.pause()
