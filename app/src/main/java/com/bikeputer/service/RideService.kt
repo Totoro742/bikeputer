@@ -40,6 +40,8 @@ internal fun decideStep(action: String?, hasSession: Boolean, starting: Boolean)
 class RideService : Service() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var liveLocation: LocationSource? = null
+    private var powerSensor: PowerSensor? = null
+    private var hrSensor: HeartRateSensor? = null
     @Volatile private var starting = false
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -71,6 +73,12 @@ class RideService : Service() {
         liveLocation = null
         _activeSession.value?.close()
         _activeSession.value = null
+        // Release the GATT clients — otherwise every ride leaks one per sensor and
+        // Android eventually stops delivering sensor data (see HeartRateSensor.close).
+        powerSensor?.close()
+        powerSensor = null
+        hrSensor?.close()
+        hrSensor = null
         starting = false
     }
 
@@ -80,6 +88,8 @@ class RideService : Service() {
 
         val power = PowerSensor(applicationContext)
         val hr = HeartRateSensor(applicationContext)
+        powerSensor = power
+        hrSensor = hr
         val location = LocationSource(applicationContext)
         liveLocation = location
         runCatching { location.start() }
