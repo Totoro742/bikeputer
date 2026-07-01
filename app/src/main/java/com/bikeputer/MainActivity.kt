@@ -145,7 +145,7 @@ class MainActivity : ComponentActivity() {
                             val s by settingsVm.riderSettings.collectAsState()
                             val grid = s.customGrids.firstOrNull { it.id == editingGridId }
                             if (grid == null) {
-                                screen = Screen.Settings
+                                LaunchedEffect(editingGridId) { screen = Screen.Settings }
                             } else {
                                 GridEditorScreen(
                                     grid = grid,

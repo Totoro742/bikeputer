@@ -25,7 +25,6 @@ import com.bikeputer.domain.MetricId
 import com.bikeputer.domain.MetricTile
 import com.bikeputer.domain.RideState
 import com.bikeputer.domain.canPlace
-import com.bikeputer.domain.cellAt
 import com.bikeputer.domain.clear
 import com.bikeputer.domain.place
 import com.bikeputer.domain.setRows
