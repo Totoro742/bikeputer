@@ -39,6 +39,13 @@ import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 
 private const val CAMERA_PADDING_PX = 80
 
+/**
+ * In heading-up fixed-follow, the rider is biased this fraction of the map height
+ * below centre so more of the road ahead is visible. Positive shifts the puck down;
+ * flip the sign here if a device renders the offset the other way.
+ */
+private const val HEADING_UP_PUCK_OFFSET_FRACTION = 0.22f
+
 private val CartoDark = object : OnlineTileSourceBase(
     "CartoDarkMatter", 0, 20, 256, ".png",
     arrayOf(
@@ -186,6 +193,7 @@ fun RouteMap(
                 positionDot.setColor(c.accent.toArgb())
                 if (follow && !frozen) {
                     if (aheadWindow.isNotEmpty() && current != null) {
+                        map.setMapCenterOffset(0, 0)
                         positionMarker.position = current
                         positionMarker.isEnabled = true
                         wasFitAhead = true
@@ -203,7 +211,6 @@ fun RouteMap(
                             }
                         }
                     } else {
-                        positionMarker.isEnabled = false
                         // Leaving fit-ahead (toggle off or off-route): restore the fixed
                         // follow zoom once, then leave zoom alone so pinch-zoom persists.
                         if (wasFitAhead) {
@@ -211,6 +218,18 @@ fun RouteMap(
                             wasFitAhead = false
                         }
                         map.mapOrientation = targetOrientation
+                        if (headingUp) {
+                            // Heading-up follow: bias the rider toward the bottom so more of
+                            // the road ahead is visible. Use the map-anchored marker (it tracks
+                            // the offset projection); the screen-centred Compose dot is only
+                            // used in north-up follow.
+                            map.setMapCenterOffset(0, (map.height * HEADING_UP_PUCK_OFFSET_FRACTION).toInt())
+                            positionMarker.isEnabled = current != null
+                            current?.let { positionMarker.position = it }
+                        } else {
+                            map.setMapCenterOffset(0, 0)
+                            positionMarker.isEnabled = false
+                        }
                         current?.let { map.controller.setCenter(it) }
                     }
                 } else if (follow && frozen) {
@@ -233,7 +252,7 @@ fun RouteMap(
             },
         )
 
-        if (follow && current != null && aheadWindow.isEmpty() && !frozen) {
+        if (follow && current != null && aheadWindow.isEmpty() && !frozen && !headingUp) {
             Box(
                 Modifier.size(16.dp).clip(CircleShape).background(c.accent),
             )
