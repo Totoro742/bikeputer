@@ -70,9 +70,12 @@ fun GridEditorScreen(
             Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp)) {
                 // clear / map options
                 TextButton(onClick = { working = working.clear(row, col); picking = null }) { Text("Clear cell") }
-                // Map only offered at col 0 where a 3×3 fits once the tapped cell is cleared
+                // Map only offered at col 0 where a 3×3 fits once the tapped cell is cleared,
+                // and only if this grid has no map yet — a second live map would spin up a
+                // second osmdroid MapView and a second full navigation stack.
                 val afterClear = working.clear(row, col)
-                if (col == 0 && afterClear.canPlace(MapTile, row, 0)) {
+                val hasMap = afterClear.fields.any { it.content is MapTile }
+                if (col == 0 && !hasMap && afterClear.canPlace(MapTile, row, 0)) {
                     TextButton(onClick = { working = afterClear.place(MapTile, row, 0); picking = null }) { Text("Map") }
                 }
                 // every metric

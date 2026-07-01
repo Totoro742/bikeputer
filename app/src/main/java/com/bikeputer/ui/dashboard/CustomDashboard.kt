@@ -13,10 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,7 +35,6 @@ import com.bikeputer.ui.theme.HeartRateColor
 import com.bikeputer.ui.theme.LocalBikeColors
 import com.bikeputer.ui.theme.hrZoneColor
 import com.bikeputer.ui.theme.powerZoneColor
-import org.osmdroid.util.GeoPoint
 
 @Composable
 fun CustomDashboard(
@@ -49,14 +44,14 @@ fun CustomDashboard(
     ftp: Int,
     route: List<GeoPos> = emptyList(),
     planned: List<GeoPos> = emptyList(),
-    @Suppress("UNUSED_PARAMETER") onlineManeuvers: List<Maneuver>? = null,
-    @Suppress("UNUSED_PARAMETER") navStatus: NavStatus = NavStatus.Offline,
-    @Suppress("UNUSED_PARAMETER") rerouteClient: RoutingClient? = null,
-    @Suppress("UNUSED_PARAMETER") offRouteThresholdM: Int = DEFAULT_OFF_ROUTE_THRESHOLD_M,
-    @Suppress("UNUSED_PARAMETER") fitAheadCamera: Boolean = false,
-    @Suppress("UNUSED_PARAMETER") speedAdaptiveLookAhead: Boolean = false,
+    onlineManeuvers: List<Maneuver>? = null,
+    navStatus: NavStatus = NavStatus.Offline,
+    rerouteClient: RoutingClient? = null,
+    offRouteThresholdM: Int = DEFAULT_OFF_ROUTE_THRESHOLD_M,
+    fitAheadCamera: Boolean = false,
+    speedAdaptiveLookAhead: Boolean = false,
     defaultZoom: Int = 16,
-    @Suppress("UNUSED_PARAMETER") onToggleFitAhead: () -> Unit = {},
+    onToggleFitAhead: () -> Unit = {},
     headingUp: Boolean = false,
     onToggleHeadingUp: () -> Unit = {},
     editing: Boolean = false,
@@ -71,11 +66,19 @@ fun CustomDashboard(
             if (mapHere != null) {
                 MapRow(
                     state = state,
+                    imperial = imperial,
                     route = route,
                     planned = planned,
+                    onlineManeuvers = onlineManeuvers,
+                    navStatus = navStatus,
+                    rerouteClient = rerouteClient,
+                    offRouteThresholdM = offRouteThresholdM,
+                    fitAheadCamera = fitAheadCamera,
+                    speedAdaptiveLookAhead = speedAdaptiveLookAhead,
+                    defaultZoom = defaultZoom,
+                    onToggleFitAhead = onToggleFitAhead,
                     headingUp = headingUp,
                     onToggleHeadingUp = onToggleHeadingUp,
-                    defaultZoom = defaultZoom,
                     editing = editing,
                     onTap = { onCellTap(mapHere.row, 0) },
                 )
@@ -116,21 +119,23 @@ private fun ColumnScope.MetricRow(
 @Composable
 private fun ColumnScope.MapRow(
     state: RideState,
+    imperial: Boolean,
     route: List<GeoPos>,
     planned: List<GeoPos>,
+    onlineManeuvers: List<Maneuver>?,
+    navStatus: NavStatus,
+    rerouteClient: RoutingClient?,
+    offRouteThresholdM: Int,
+    fitAheadCamera: Boolean,
+    speedAdaptiveLookAhead: Boolean,
+    defaultZoom: Int,
+    onToggleFitAhead: () -> Unit,
     headingUp: Boolean,
     onToggleHeadingUp: () -> Unit,
-    defaultZoom: Int,
     editing: Boolean,
     onTap: () -> Unit,
 ) {
     val c = LocalBikeColors.current
-    var frozen by remember { mutableStateOf(false) }
-    val lat = state.latitude
-    val lng = state.longitude
-    val current = if (lat != null && lng != null) GeoPoint(lat, lng) else null
-    val points = route.map { GeoPoint(it.lat, it.lng) }
-    val plannedPoints = planned.map { GeoPoint(it.lat, it.lng) }
 
     Box(
         Modifier.fillMaxWidth().weight(3f).clip(RoundedCornerShape(10.dp))
@@ -144,16 +149,22 @@ private fun ColumnScope.MapRow(
                 MetricLabel("MAP", size = 12)
             }
         } else {
-            RouteMap(
-                route = points,
-                current = current,
-                modifier = Modifier.fillMaxSize(),
-                planned = plannedPoints,
-                headingUp = headingUp,
-                bearingDeg = state.bearingDeg,
-                frozen = frozen,
+            NavMap(
+                state = state,
+                imperial = imperial,
+                route = route,
+                planned = planned,
+                onlineManeuvers = onlineManeuvers,
+                navStatus = navStatus,
+                rerouteClient = rerouteClient,
+                offRouteThresholdM = offRouteThresholdM,
+                fitAheadCamera = fitAheadCamera,
+                speedAdaptiveLookAhead = speedAdaptiveLookAhead,
                 defaultZoom = defaultZoom,
-                onUserPan = { frozen = true },
+                onToggleFitAhead = onToggleFitAhead,
+                headingUp = headingUp,
+                onToggleHeadingUp = onToggleHeadingUp,
+                modifier = Modifier.fillMaxSize(),
             )
         }
     }

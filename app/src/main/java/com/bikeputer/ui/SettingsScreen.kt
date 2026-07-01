@@ -21,9 +21,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -183,11 +187,16 @@ private fun GridManager(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             RadioButton(selected = g.id == activeId, onClick = { onSelect(g.id) })
+            // Edit the name in local state and persist once on focus loss — binding the
+            // field straight to the DataStore-backed name would re-encode every grid on
+            // each keystroke and could drop characters through the async round-trip.
+            var name by remember(g.id) { mutableStateOf(g.name) }
             OutlinedTextField(
-                value = g.name,
-                onValueChange = { onRename(g.id, it) },
+                value = name,
+                onValueChange = { name = it },
                 singleLine = true,
-                modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+                modifier = Modifier.weight(1f).padding(horizontal = 8.dp)
+                    .onFocusChanged { if (!it.isFocused && name != g.name) onRename(g.id, name) },
             )
             TextButton(onClick = { onEdit(g.id) }) { Text("Edit") }
             TextButton(onClick = { onDelete(g.id) }) { Text("Delete") }
