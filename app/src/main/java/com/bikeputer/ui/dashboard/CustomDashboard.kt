@@ -23,6 +23,7 @@ import com.bikeputer.domain.CustomGrid
 import com.bikeputer.domain.GRID_COLUMNS
 import com.bikeputer.domain.GeoPos
 import com.bikeputer.domain.MapTile
+import com.bikeputer.domain.MetricId
 import com.bikeputer.domain.MetricTile
 import com.bikeputer.domain.RideState
 import com.bikeputer.domain.TileContent
@@ -32,7 +33,9 @@ import com.bikeputer.nav.Maneuver
 import com.bikeputer.nav.online.NavStatus
 import com.bikeputer.nav.online.RoutingClient
 import com.bikeputer.ui.theme.HeartRateColor
+import com.bikeputer.ui.theme.HrZoneColors
 import com.bikeputer.ui.theme.LocalBikeColors
+import com.bikeputer.ui.theme.PowerZoneColors
 import com.bikeputer.ui.theme.hrZoneColor
 import com.bikeputer.ui.theme.powerZoneColor
 
@@ -59,7 +62,10 @@ fun CustomDashboard(
     modifier: Modifier = Modifier,
 ) {
     val c = LocalBikeColors.current
-    Column(modifier.fillMaxSize().background(c.bg).padding(6.dp)) {
+    Column(
+        modifier.fillMaxSize().background(c.bg).padding(6.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
         var r = 0
         while (r < grid.rows) {
             val mapHere = grid.cellAt(r, 0)?.takeIf { it.content is MapTile && it.row == r }
@@ -101,7 +107,7 @@ private fun ColumnScope.MetricRow(
     editing: Boolean,
     onCellTap: (Int, Int) -> Unit,
 ) {
-    Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+    Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         for (col in 0 until GRID_COLUMNS) {
             MetricCell(
                 content = grid.cellAt(row, col)?.content,
@@ -191,6 +197,19 @@ private fun MetricCell(
                 r.value, size = 30, color = colorFor(r.color, state),
                 weight = FontWeight.Bold, unit = r.unit, unitSize = 13,
             )
+            // Power / HR tiles carry a zone bar, matching Dashboard C. The active
+            // segment is null (all dimmed) while the sensor is disconnected.
+            when (content.metric) {
+                MetricId.POWER -> ZoneBar(
+                    PowerZoneColors, state.powerZone?.let { it - 1 },
+                    Modifier.fillMaxWidth().padding(top = 6.dp), height = 5.dp,
+                )
+                MetricId.HEART_RATE -> ZoneBar(
+                    HrZoneColors, state.hrZone?.let { it - 1 },
+                    Modifier.fillMaxWidth().padding(top = 6.dp), height = 5.dp,
+                )
+                else -> {}
+            }
         }
     } else {
         // Empty cell — show "+" affordance in editing mode, invisible otherwise.
